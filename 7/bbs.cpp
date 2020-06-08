@@ -86,6 +86,10 @@ int main(){
     mpz_init_set_str(xx,"0",10);
     bbs(xx,50);
     gmp_printf("%Zd\n",xx);
+    bbs(xx,50);
+    gmp_printf("%Zd\n",xx);
+    bbs(xx,50);
+    gmp_printf("%Zd\n",xx);
     mpz_clear(xx);
     return 0;
 }

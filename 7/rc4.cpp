@@ -76,22 +76,29 @@ unsigned char *rc4_decode(unsigned char *p,unsigned char *k,int *a,int *b,int rc
 }
 
 int main(){
-    // FILE *infile =fopen("hello.s","rb");
+    // FILE *infile =fopen("test.txt","rb");
     // FILE *outfile = fopen("out","wb");
-    FILE *infile =fopen("out","rb");
-    FILE *outfile = fopen("out1","wb");
-    unsigned char *s;
-    s = (unsigned char*)malloc(sizeof(unsigned char) * 260); 
-    memset(s,0,260);
-    unsigned char k[]="wqnmd";
+    // FILE *infile =fopen("out","rb");
+    // FILE *outfile = fopen("out1","wb");
+    // unsigned char *s;
+    // s = (unsigned char*)malloc(sizeof(unsigned char) * 260);
+    // memset(s,0,260);
+    unsigned char s[] = {0x01,0x23,0x45,0x67,0x89,0xfe,0xdc,0xba,0xab,0xcd,0xef,0x98,0x76,0x54,0x32,0x10};
+    unsigned char k[] = {0x01,0x23,0x45,0x67,0x89,0xfe,0xdc,0xba,0xab,0xcd,0xef,0x98,0x76,0x54,0x32,0x10};
+    int len = 16;
     int rc=0;
     int a =0,b=0;
-    while( (rc = fread(s,sizeof(unsigned char), 256,infile)) != 0 ){
+    unsigned char *res = rc4_encode(s, k, &a, &b, len);
+    for (int i =0;i<256;i++){
+        printf("%x ", res[i]);
+    }
+    putchar('\n');
+    // while( (rc = fread(s,sizeof(unsigned char), 256,infile)) != 0 ){
         // printf("rc = %d\n",rc);
-        fwrite(rc4_encode(s,k,&a,&b,rc),sizeof(unsigned char),rc,outfile);
+        // fwrite(rc4_encode(s,k,&a,&b,rc),sizeof(unsigned char),rc,outfile);
         // printf("a = %d, b= %d\n",a,b);
         // memset(s,0,260);
         // fwrite(s,sizeof(unsigned char),rc,outfile);
-    }
+    // }
     return 0;
 }

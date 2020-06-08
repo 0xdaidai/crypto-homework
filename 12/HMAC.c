@@ -13,23 +13,20 @@
 void HMAC(unsigned char *hash,unsigned char *M,long long int mLen,unsigned char *K,long long int kLen,int b);
 
 int main(){
-    unsigned char M[]="asdsadsagdsghshsgfhshgfhsh";
+    unsigned char M[] = "Sample message for keylen=blocklen";
     long long int mLen = strlen(M);
-    unsigned char K[SHA1_BLOCK_SIZE] = {21,22,23,24,25};
-
-    SHA1_CTX ctx;
-    sha1_init(&ctx);
-    sha1_update(&ctx, K,SHA1_BLOCK_SIZE );
-    memset(K,0,SHA1_BLOCK_SIZE);
-    sha1_final(&ctx, K);
+    unsigned char K[SHA1_BLOCK_SIZE] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63};
 
     int b = 512;
 
     unsigned char hash[SHA1_BLOCK_SIZE];
     memset(hash,0,SHA1_BLOCK_SIZE);
-    HMAC(hash, M, mLen, K, SHA1_BLOCK_SIZE, b);
+    HMAC(hash, M, mLen, K, 64, b);
 
-
+    for(int i = 0;i<SHA1_BLOCK_SIZE;i++){
+        printf("%x ",hash[i] );
+    }
+    printf("\n\n");
 }
 
 void HMAC(unsigned char *hash,unsigned char *M,long long int mLen,unsigned char *K,long long int kLen,int b){
@@ -40,9 +37,10 @@ void HMAC(unsigned char *hash,unsigned char *M,long long int mLen,unsigned char 
         memset(zero,0,bLen - kLen);
         K_ = array_append(zero, bLen-kLen, K, kLen);
         free(zero);
+        printf("paddKey\n" );
     }
     else
-        *K_ = K;
+        K_ = K;
     unsigned char *S = (unsigned char*)malloc(sizeof(unsigned char) * bLen);
     for(int i =0; i< bLen; i++)
         S[i] = K_[i]^0x36;
