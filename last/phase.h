@@ -195,7 +195,7 @@ void _server_update(struct bloom *bf, Private *a, char *uFile, char *pFile, int 
 {
     FILE *fp1 = fopen(uFile, "r");
     FILE *fp2 = fopen(pFile, "w");
-    char uStr[1024], *uChar, *pChar;
+    char uStr[1024], *uChar;
     mpz_t u;
     mpz_inits(u, NULL);
     register unsigned int c, d, x;
@@ -205,10 +205,9 @@ void _server_update(struct bloom *bf, Private *a, char *uFile, char *pFile, int 
         mpz_set_str(u, uStr, 16);
         mpz_powm(u, u, a->d, a->n);
         uChar = mpz_get_str(NULL, 16, u);
-        int hits = 0;
         c = murmurhash2(uChar, strlen(uChar), 0x9747b28c);
         d = murmurhash2(uChar, strlen(uChar), c);
-        for (unsigned int j = 0; j < bf->hashes; j++)
+        for (unsigned int j = 0; j < (unsigned int )bf->hashes; j++)
         {
             x = (c + j * d) % bf->bits;
             fprintf(fp2, "%d ", x);
