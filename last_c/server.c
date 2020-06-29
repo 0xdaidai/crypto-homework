@@ -66,8 +66,11 @@ int main() {
 	            printf("..........接收成功..........\n");
             else
 	            printf("接收失败!\n");
+            printf("word: %s\n", recv_buf);
+            delete_file("./temp");
             check_and_send(recv_buf);
-            submit_Files(client,"./send");
+            printf("check over!\n");
+            submit_Files(client,"./temp");
         }
         else
             printf("Wrong msg!\n");
@@ -79,6 +82,7 @@ int main() {
 void check_and_send(char s[])
 {
     char path[] = "./resource";
+    char cp_path[1024];
     DIR *dir;
     struct dirent *dir_info;
     char file_path[PATH_MAX];
@@ -98,12 +102,22 @@ void check_and_send(char s[])
                 continue;
             if(strstr(file_path,".bf") == NULL)
                 continue;
+            printf("check %s\n",file_path );
             struct bloom bf;
             _bloom_read(&bf,file_path);
-            if (bloom_check(&bf, s, strlen(s))){
-                char dst[80] = "./send/";
+            if (bloom_check(&bf, s, BUFFER_SIZE)){
+                char dst[80] = "./temp/";
                 strcat(dst,dir_info->d_name);
-                copy_file(file_path,dst);
+                int tmp = strlen(dst);
+                dst[tmp-2] = 'e';
+                dst[tmp-1] = 'n';
+                dst[tmp] = 'c';
+                printf("dst: %s\n",dst );
+                tmp = strlen(file_path);
+                memset(cp_path,0,1024);
+                memcpy(cp_path,file_path,tmp-3);
+                strcat(cp_path,".enc");
+                copy_file(cp_path,dst);
             }
         }
     }

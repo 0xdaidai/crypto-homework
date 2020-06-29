@@ -29,6 +29,7 @@ int init(char *path);
 
 int main(){
     WORD key_schedule[60];
+	aes_key_setup(K, key_schedule, 256);
     int word_len;
     init("test_dir");
     char recv_buf[BUFFER_SIZE] = {0};
@@ -47,18 +48,23 @@ int main(){
     printf("send over!\n");
     rename("resource","test_dir");
 
-    sleep(1);
+    // sleep(1);
     memset(recv_buf,0,BUFFER_SIZE);
     sprintf(recv_buf,"%d",2);
     send(clientSocket,recv_buf,BUFFER_SIZE,0);
     memset(recv_buf,0,BUFFER_SIZE);
-    scanf("%[^\n]%*c",recv_buf);
+    // scanf("%[^\n]%*c",recv_buf);
+    strcpy(recv_buf,"wonderful");
     word_len = strlen(recv_buf);
     word_len = word_len%16==0?word_len:(word_len/16*16+16);
     aes_encrypt_cbc((BYTE*)recv_buf,word_len,(BYTE*)recv_buf,key_schedule,256,iv);
     send(clientSocket,recv_buf,BUFFER_SIZE,0);
     
+    sleep(5);
     receive_File(clientSocket);
+    memset(recv_buf,0,BUFFER_SIZE);
+    sprintf(recv_buf,"%d",0);
+    send(clientSocket,recv_buf,BUFFER_SIZE,0);
     
     return 0;
 }
@@ -155,11 +161,14 @@ int file_EN(char name[],BYTE K[],BYTE IV[]){
         memset(buf,0,BUFFER_SIZE);
         memset(res,0,BUFFER_SIZE);
         len_block = fread(buf, 1, BUFFER_SIZE, fp);
+        // printf("buf: %s\n",buf );//////////////////////////
         buf[len_block]='\0';
         aes_encrypt_cbc(buf,BUFFER_SIZE,res,key_schedule,256,IV);
-        fwrite(buf,len_block,1,out);
+        fwrite(res,len_block,1,out);
     }
     printf("file: %s is ready\n",name_enc );
+    fclose(fp);
+    fclose(out);
     return 1;
 }
 
@@ -193,6 +202,7 @@ void files_EN(const char *path)
 
 
 int make_BF(int total,double error,char name[],BYTE K[],BYTE IV[]){
+    unsigned char tmp[1024];
     printf("Now we are bf for %s\n", name);
     struct bloom bf;
     bloom_init(&bf,total,error);
@@ -201,7 +211,7 @@ int make_BF(int total,double error,char name[],BYTE K[],BYTE IV[]){
     strcat(name_bf,".bf");
     FILE *fp = fopen(name,"r");
     char buf[1024*1204]={0};
-    BYTE res[80];
+    BYTE res[BUFFER_SIZE];
     int len_file, len_block;
     int totalBlock;
     WORD key_schedule[60];
@@ -214,28 +224,33 @@ int make_BF(int total,double error,char name[],BYTE K[],BYTE IV[]){
     printf("文件的总长度len_file:%d\n",len_file);
     fread(buf,1,len_file,fp);
     int i = -1;
-    while(buf[i]!='\0'){
+    while(buf[i+1]!='\0'){
         i++;
         if((buf[i]>='a'&&buf[i]<='z')||(buf[i]>='A'&&buf[i]<='Z'))  
             continue;
         else
             buf[i] = ' ';
     }
+    printf("buf: %s\n", buf);//////////////////
     token = strtok(buf, s);
     int word_len;
     //init bf
     bloom_init(&bf, total, error);
     while( token != NULL ) {
-        memset(res,0,80);
+        memset(res,0,BUFFER_SIZE);
+        memset(tmp,0,1024);
         word_len = strlen(token);
+        // printf("word: %s\n", token);
+        strncpy(tmp,token,word_len);
         word_len = word_len%16==0?word_len:(word_len/16*16+16);
-        aes_encrypt_cbc((BYTE*)token,word_len,res,key_schedule,256,IV);
+        aes_encrypt_cbc(tmp,word_len,res,key_schedule,256,IV);
         //add in bf
-        bloom_add(&bf, res, word_len);
+        bloom_add(&bf, res, BUFFER_SIZE);
         token = strtok(NULL, s);
     }
     _bloom_write(&bf,name_bf);
 
+    fclose(fp);
     return 1;
 }
 
